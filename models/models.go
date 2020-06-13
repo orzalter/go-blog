@@ -5,11 +5,14 @@ import (
 	"log"
 
 	"github.com/jinzhu/gorm"
+	// mysql drive
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/orzalter/go-blog/pkg/setting"
 )
 
 var db *gorm.DB
 
+// Model for database.
 type Model struct {
 	ID         int `gorm:"primary_key" json:"id"`
 	CreatedON  int `json:"created_on"`
@@ -33,7 +36,7 @@ func init() {
 	host = sec.Key("HOST").String()
 	tablePrefix = sec.Key("TABLE_PREFIX").String()
 
-	db, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s>charset=utf8&parseTime=True&loc=Local", user, password, host, dbName))
+	db, err = gorm.Open(dbType, fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8&parseTime=True&loc=Local", user, password, host, dbName))
 	if err != nil {
 		log.Println(err)
 	}
@@ -41,4 +44,14 @@ func init() {
 	gorm.DefaultTableNameHandler = func(db *gorm.DB, defaultTableName string) string {
 		return tablePrefix + defaultTableName
 	}
+
+	db.SingularTable(true)
+	db.LogMode(true)
+	db.DB().SetMaxIdleConns(10)
+	db.DB().SetMaxOpenConns(100)
+}
+
+// Close close database.
+func Close() {
+	defer db.Close()
 }

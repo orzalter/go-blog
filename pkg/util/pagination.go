@@ -1,4 +1,4 @@
-package unit
+package util
 
 import (
 	"github.com/orzalter/go-blog/pkg/setting"
